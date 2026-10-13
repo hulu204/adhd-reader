@@ -5,144 +5,141 @@
   const letters = /\p{L}/u;
   const cjk = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}\u3100-\u312f\u31a0-\u31bf]/u;
   const words = /[\p{L}\p{M}\p{N}]+(?:['’][\p{L}\p{M}\p{N}]+)*/gu;
+  const segmenter = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
   const originals = new Map();
-  const segmenter = typeof Intl.Segmenter === 'function'
-    ? new Intl.Segmenter(undefined, { granularity: 'grapheme' }) : null;
-  let settings = defaults;
-  let active = false;
-  let generation = 0;
-  let scheduled = false;
-  const roots = new Set();
-  let walker = null;
-
+  let settings = { ...defaults }, active = false, scheduled = false;
+  let roots = new Set(), stack = [], updates = null;
+  let loaded = false;
+  const pending = {};
   const eligible = (node) => node.parentElement && !node.parentElement.closest(skipped)
-    && letters.test(node.data);
+    && node.parentElement.namespaceURI === 'http://www.w3.org/1999/xhtml' && letters.test(node.data);
 
+  function emphasize(parts) {
+    for (const part of parts) {
+      const count = Math.max(1, Math.ceil(part.units.length * settings.ratio));
+      part.bold.textContent = part.units.slice(0, count).join('');
+      part.rest.textContent = part.units.slice(count).join('');
+    }
+  }
   function transform(node) {
-    if (!eligible(node)) return;
-    const source = node.data;
-    const wrapper = document.createElement('span');
+    if (!eligible(node) || node.data.length > 4000) return;
+    const source = node.data, wrapper = document.createElement('span'), parts = [];
     wrapper.className = 'adhdr-w';
     let cursor = 0;
-    let changed = false;
     for (const match of source.matchAll(words)) {
-      const word = match[0];
-      if (!letters.test(word) || cjk.test(word)) continue;
+      if (!letters.test(match[0]) || cjk.test(match[0])) continue;
       wrapper.append(document.createTextNode(source.slice(cursor, match.index)));
-      const units = segmenter ? Array.from(segmenter.segment(word), (part) => part.segment) : Array.from(word);
-      const count = Math.max(1, Math.ceil(units.length * settings.ratio));
-      const bold = document.createElement('b');
-      bold.className = 'adhdr-b';
-      bold.textContent = units.slice(0, count).join('');
-      wrapper.append(bold);
-      if (count < units.length) {
-        const rest = document.createElement('span');
-        rest.className = 'adhdr-r';
-        rest.textContent = units.slice(count).join('');
-        wrapper.append(rest);
-      }
-      cursor = match.index + word.length;
-      changed = true;
+      const bold = document.createElement('span'), rest = document.createElement('span');
+      bold.className = 'adhdr-b'; rest.className = 'adhdr-r';
+      const units = Array.from(segmenter.segment(match[0]), (part) => part.segment);
+      parts.push({ bold, rest, units }); wrapper.append(bold, rest);
+      cursor = match.index + match[0].length;
     }
-    if (!changed) return;
+    if (!parts.length) return;
     wrapper.append(document.createTextNode(source.slice(cursor)));
-    originals.set(wrapper, { node, source });
+    emphasize(parts);
+    originals.set(wrapper, { node, source, parts });
     node.replaceWith(wrapper);
   }
-
+  function restore(wrapper, original) {
+    // Preserve edits made by the host page instead of resurrecting stale source text.
+    original.node.data = wrapper.textContent;
+    wrapper.replaceWith(original.node);
+    originals.delete(wrapper);
+  }
   function enqueue(root) {
     if (!active || !root?.isConnected) return;
-    if (root.nodeType === Node.TEXT_NODE && eligible(root)) roots.add(root);
-    else if (root.nodeType === Node.ELEMENT_NODE && !root.closest(skipped)) roots.add(root);
+    if (root.nodeType === Node.TEXT_NODE || root.nodeType === Node.ELEMENT_NODE) roots.add(root);
     schedule();
   }
-
   function collect(records) {
     for (const record of records) {
-      if (record.type === 'characterData') enqueue(record.target);
-      else if (record.type === 'attributes') enqueue(record.target);
+      // Sweep detached wrappers incrementally after removals.
+      if (record.removedNodes?.length) updates = originals.entries();
+      if (record.type === 'attributes') {
+        updates = originals.entries();
+        enqueue(record.target);
+      } else if (record.type === 'characterData') enqueue(record.target);
       else for (const node of record.addedNodes) enqueue(node);
     }
-    // Release detached subtrees on dynamic sites.
-    for (const wrapper of originals.keys()) if (!wrapper.isConnected) originals.delete(wrapper);
+    schedule();
   }
   const observer = new MutationObserver(collect);
-  const observe = () => observer.observe(document.documentElement, {
-    childList: true, subtree: true, characterData: true,
-    attributes: true, attributeFilter: ['contenteditable']
-  });
-
+  function observe() {
+    observer.observe(document.documentElement, { childList: true, subtree: true,
+      characterData: true, attributes: true, attributeFilter: ['contenteditable'] });
+  }
   function schedule() {
-    if (scheduled || !active || (!roots.size && !walker)) return;
+    if (scheduled || (!updates && !roots.size && !stack.length)) return;
     scheduled = true;
-    const version = generation;
     const run = (deadline) => {
-      if (version !== generation) return;
-      collect(observer.takeRecords());
-      // Disconnect only for our synchronous DOM edits, avoiding self-triggered work.
-      observer.disconnect();
-      const started = performance.now();
-      let processed = 0;
-      const batch = [];
+      collect(observer.takeRecords()); observer.disconnect();
+      const start = performance.now(); let count = 0;
       try {
-        while (active && processed < 200 && performance.now() - started < 8
+        while (count++ < 100 && performance.now() - start < 6
           && (deadline.didTimeout || deadline.timeRemaining() > 1)) {
-          if (!walker) {
+          if (updates) {
+            const next = updates.next();
+            if (next.done) { updates = null; continue; }
+            const [wrapper, original] = next.value;
+            if (!wrapper.isConnected) originals.delete(wrapper);
+            else if (!active || wrapper.parentElement?.closest(skipped)) restore(wrapper, original);
+            else if (wrapper.textContent === original.source
+              && original.parts.every((part) => wrapper.contains(part.bold) && wrapper.contains(part.rest))) emphasize(original.parts);
+            continue;
+          }
+          if (!active) { roots.clear(); stack = []; break; }
+          if (!stack.length) {
             const root = roots.values().next().value;
             if (!root) break;
-            roots.delete(root);
-            if (!root.isConnected) continue;
-            if (root.nodeType === Node.TEXT_NODE) { batch.push(root); processed++; continue; }
-            walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
-              acceptNode: (node) => eligible(node) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT
-            });
+            roots.delete(root); stack.push(root);
           }
-          const node = walker.nextNode();
-          if (!node) { walker = null; continue; }
-          batch.push(node);
-          processed++;
+          const node = stack.pop();
+          if (!node.cursor && !node.isConnected) continue;
+          if (node.nodeType === Node.TEXT_NODE) transform(node);
+          else if (node.nodeType === Node.ELEMENT_NODE && !node.closest(skipped)) {
+            // A cursor visits one sibling at a time, even in very wide subtrees.
+            if (node.firstChild) stack.push({ cursor: node.firstChild });
+          } else if (node.cursor) {
+            const child = node.cursor;
+            if (child.nextSibling) stack.push({ cursor: child.nextSibling });
+            stack.push(child);
+          }
         }
-        for (const node of batch) if (node.isConnected) transform(node);
-      } finally { observe(); }
-      scheduled = false;
-      schedule();
+      } finally { observe(); scheduled = false; schedule(); }
     };
-    if ('requestIdleCallback' in window) window.requestIdleCallback(run, { timeout: 200 });
-    else setTimeout(() => run({ didTimeout: true, timeRemaining: () => 8 }), 16);
+    if ('requestIdleCallback' in window) requestIdleCallback(run, { timeout: 100 });
+    else setTimeout(() => run({ didTimeout: true, timeRemaining: () => 6 }), 16);
   }
-
-  function apply() {
-    generation++;
-    scheduled = false;
-    roots.clear();
-    walker = null;
-    observer.disconnect();
-    const parents = new Set();
-    for (const [wrapper, original] of originals) {
-      if (!wrapper.isConnected) continue;
-      parents.add(wrapper.parentNode);
-      original.node.data = original.source;
-      wrapper.replaceWith(original.node);
+  function apply(values) {
+    if (!loaded) Object.assign(pending, values);
+    const previous = settings, wasActive = active;
+    settings = { ...settings, ...values };
+    for (const [key, min, max] of [['ratio', .2, .7], ['weight', 500, 900], ['opacity', .4, 1]]) {
+      settings[key] = Number.isFinite(settings[key]) ? Math.min(max, Math.max(min, settings[key])) : defaults[key];
     }
-    originals.clear();
-    for (const parent of parents) parent.normalize();
-    active = settings.enabled && !settings.disabledSites[location.hostname];
+    settings.enabled = settings.enabled !== false;
+    if (!settings.disabledSites || typeof settings.disabledSites !== 'object') settings.disabledSites = {};
+    active = settings.enabled && !Object.hasOwn(settings.disabledSites, location.hostname);
     document.documentElement.style.setProperty('--adhdr-weight', String(settings.weight));
     document.documentElement.style.setProperty('--adhdr-opacity', String(settings.opacity));
-    observe();
-    if (active) enqueue(document.body || document.documentElement);
+    if (active !== wasActive || previous.ratio !== settings.ratio) updates = originals.entries();
+    if (active && !wasActive) enqueue(document.body || document.documentElement);
+    if (!active) { roots.clear(); stack = []; }
+    schedule();
   }
-
   chrome.runtime.onMessage.addListener((message, _sender, respond) => {
     if (message.type === 'adhdr-site') respond({ hostname: location.hostname });
+    if (message.type === 'adhdr-preview') { apply(message.values); respond({ ok: true }); }
   });
   chrome.storage.onChanged.addListener((changes, area) => {
     if (area !== 'sync') return;
-    let changed = false;
-    for (const key of Object.keys(defaults)) {
-      if (key in changes) { settings[key] = changes[key].newValue ?? defaults[key]; changed = true; }
-    }
-    if (changed) apply();
+    const values = {};
+    for (const key of Object.keys(defaults)) if (key in changes) values[key] = changes[key].newValue ?? defaults[key];
+    apply(values);
   });
-  chrome.storage.sync.get(defaults).then((stored) => { settings = stored; apply(); });
+  observe();
+  const initial = chrome.storage.sync.get(defaults);
+  initial.then((stored) => { loaded = true; apply({ ...stored, ...pending }); })
+    .catch(() => { loaded = true; apply({ ...defaults, ...pending }); });
 })();

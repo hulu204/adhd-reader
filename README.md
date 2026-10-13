@@ -5,10 +5,10 @@ ADHD Reader is a Chrome Manifest V3 extension that emphasizes the first part of 
 ## Features
 
 - Automatically applies on supported websites, with a global switch and hostname-based site opt-outs.
-- Adjustable bold ratio (20–70%, default 45%), bold weight (500–900, default 700), and rest-of-word opacity (40–100%, default 100%). Changes apply when a control is released.
+- Adjustable bold ratio (20–70%, default 45%), bold weight (500–900, default 700), and rest-of-word opacity (40–100%, default 100%). Sliders preview immediately on the current page; preferences sync when a control is released.
 - Alt+Shift+R toggles the current site. Customize shortcuts at `chrome://extensions/shortcuts` if Chrome reports a conflict.
-- Dynamic content is processed in small idle-time batches. Disabling restores original text and normalizes adjacent text nodes.
-- Unicode letter words are supported; Chinese, Japanese, and Korean scripts are left unchanged. Code, form controls, editable elements, embedded frames, and graphics are skipped.
+- Dynamic content is processed in small idle-time batches. Disabling restores text in small batches and preserves edits made by the page.
+- Unicode grapheme clusters are supported, including RTL text; text nodes longer than 4,000 UTF-16 units are skipped to limit blocking work; Chinese, Japanese, and Korean scripts are left unchanged. Code, form controls, editable elements, embedded frames, and graphics are skipped.
 
 ## Install unpacked
 
@@ -20,7 +20,7 @@ Chrome internal pages, the Chrome Web Store, and other protected pages cannot ru
 
 ## Privacy
 
-The extension requests only the `storage` permission. It contains no remote code, tracking, analytics, or network requests. Chrome sync stores preferences and disabled hostnames; page text never leaves the page. See [PRIVACY.md](PRIVACY.md).
+The only requested API permission is `storage`. Automatic operation also requires broad website access through the `<all_urls>` content-script match. It contains no remote code, tracking, analytics, or network requests. Chrome sync stores preferences and disabled hostnames; page text never leaves the page. See [PRIVACY.md](PRIVACY.md).
 
 ## Development and packaging
 

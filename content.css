@@ -1,5 +1,5 @@
 /* Keep typography and layout inherited from the page. */
-span.adhdr-w, span.adhdr-r, b.adhdr-b {
+span.adhdr-w, span.adhdr-r, span.adhdr-b {
   display: inline !important;
   font-family: inherit !important;
   font-size: inherit !important;
@@ -10,5 +10,16 @@ span.adhdr-w, span.adhdr-r, b.adhdr-b {
   white-space: inherit !important;
 }
 span.adhdr-w, span.adhdr-r { font-weight: inherit !important; }
-b.adhdr-b { font-weight: var(--adhdr-weight, 700) !important; }
+span.adhdr-b { font-weight: var(--adhdr-weight, 700) !important; }
 span.adhdr-r { opacity: var(--adhdr-opacity, 1) !important; }
+
+/* Prevent host span styles from adding boxes or decorative pseudo content. */
+span.adhdr-w, span.adhdr-r, span.adhdr-b {
+  margin: 0 !important; padding: 0 !important; border: 0 !important;
+  background: transparent !important; position: static !important;
+  vertical-align: baseline !important; float: none !important;
+  text-transform: inherit !important; word-spacing: inherit !important;
+}
+span.adhdr-w::before, span.adhdr-w::after,
+span.adhdr-b::before, span.adhdr-b::after,
+span.adhdr-r::before, span.adhdr-r::after { content: none !important; }

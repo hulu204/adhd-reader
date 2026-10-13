@@ -8,7 +8,7 @@ chrome.commands.onCommand.addListener(async (command) => {
     if (!hostname) return;
     const { disabledSites = {} } = await chrome.storage.sync.get('disabledSites');
     const sites = { ...disabledSites };
-    if (sites[hostname]) delete sites[hostname];
+    if (Object.hasOwn(sites, hostname)) delete sites[hostname];
     else sites[hostname] = true;
     await chrome.storage.sync.set({ disabledSites: sites });
   } catch {
