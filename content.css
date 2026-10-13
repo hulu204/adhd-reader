@@ -1,0 +1,14 @@
+/* Keep typography and layout inherited from the page. */
+span.adhdr-w, span.adhdr-r, b.adhdr-b {
+  display: inline !important;
+  font-family: inherit !important;
+  font-size: inherit !important;
+  font-style: inherit !important;
+  line-height: inherit !important;
+  letter-spacing: inherit !important;
+  color: inherit !important;
+  white-space: inherit !important;
+}
+span.adhdr-w, span.adhdr-r { font-weight: inherit !important; }
+b.adhdr-b { font-weight: var(--adhdr-weight, 700) !important; }
+span.adhdr-r { opacity: var(--adhdr-opacity, 1) !important; }
