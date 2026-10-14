@@ -2,10 +2,8 @@
   'use strict';
   const defaults = { enabled: true, disabledSites: {}, ratio: 0.45, weight: 700, opacity: 1 };
   const skipped = 'script,style,noscript,textarea,input,select,option,code,pre,kbd,samp,svg,math,canvas,iframe,[contenteditable],.adhdr-w';
-  const letters = /\p{L}/u;
-  const cjk = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}\u3100-\u312f\u31a0-\u31bf]/u;
-  const words = /[\p{L}\p{M}\p{N}]+(?:['’][\p{L}\p{M}\p{N}]+)*/gu;
-  const segmenter = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
+  if (location.hostname === 'docs.google.com' && location.pathname.startsWith('/document/')) return;
+  const { letters, create, update } = ADHDReader;
   const originals = new Map();
   let settings = { ...defaults }, active = false, scheduled = false;
   let roots = new Set(), stack = [], updates = null;
@@ -14,30 +12,12 @@
   const eligible = (node) => node.parentElement && !node.parentElement.closest(skipped)
     && node.parentElement.namespaceURI === 'http://www.w3.org/1999/xhtml' && letters.test(node.data);
 
-  function emphasize(parts) {
-    for (const part of parts) {
-      const count = Math.max(1, Math.ceil(part.units.length * settings.ratio));
-      part.bold.textContent = part.units.slice(0, count).join('');
-      part.rest.textContent = part.units.slice(count).join('');
-    }
-  }
+  function emphasize(parts) { update(parts, settings.ratio); }
   function transform(node) {
     if (!eligible(node) || node.data.length > 4000) return;
-    const source = node.data, wrapper = document.createElement('span'), parts = [];
-    wrapper.className = 'adhdr-w';
-    let cursor = 0;
-    for (const match of source.matchAll(words)) {
-      if (!letters.test(match[0]) || cjk.test(match[0])) continue;
-      wrapper.append(document.createTextNode(source.slice(cursor, match.index)));
-      const bold = document.createElement('span'), rest = document.createElement('span');
-      bold.className = 'adhdr-b'; rest.className = 'adhdr-r';
-      const units = Array.from(segmenter.segment(match[0]), (part) => part.segment);
-      parts.push({ bold, rest, units }); wrapper.append(bold, rest);
-      cursor = match.index + match[0].length;
-    }
+    const source = node.data;
+    const { wrapper, parts } = create(source, settings);
     if (!parts.length) return;
-    wrapper.append(document.createTextNode(source.slice(cursor)));
-    emphasize(parts);
     originals.set(wrapper, { node, source, parts });
     node.replaceWith(wrapper);
   }
@@ -129,7 +109,13 @@
     schedule();
   }
   chrome.runtime.onMessage.addListener((message, _sender, respond) => {
-    if (message.type === 'adhdr-site') respond({ hostname: location.hostname });
+    if (message.type === 'adhdr-site') {
+      const embedded = document.querySelector('embed[type="application/pdf"], object[type="application/pdf"]');
+      const candidate = embedded?.getAttribute('src') || embedded?.getAttribute('data');
+      let url = location.href;
+      try { if (candidate) url = new URL(candidate, location.href).href; } catch { /* Ignore invalid source. */ }
+      respond({ hostname: location.hostname, pdf: document.contentType === 'application/pdf' || Boolean(embedded), url });
+    }
     if (message.type === 'adhdr-preview') { apply(message.values); respond({ ok: true }); }
   });
   chrome.storage.onChanged.addListener((changes, area) => {

@@ -1,21 +1,6 @@
-<!doctype html>
-<html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>ADHD Reader</title><link rel="stylesheet" href="popup.css"></head>
-<body>
-  <header><img src="icons/48.png" alt="" width="32" height="32"><div><h1>ADHD Reader</h1><p>Focus &amp; Speed Reading</p></div></header>
-  <main>
-    <label class="toggle"><span>Global enable</span><input id="enabled" type="checkbox" disabled></label>
-    <label class="toggle"><span>Enable on this site</span><input id="site" type="checkbox" disabled></label>
-    <p id="hostname">Checking this page…</p>
-    <label class="slider" for="ratio">Bold ratio <output id="ratio-value"></output></label>
-    <input id="ratio" type="range" min="0.2" max="0.7" step="0.01" value="0.45" disabled>
-    <label class="slider" for="weight">Bold weight <output id="weight-value"></output></label>
-    <input id="weight" type="range" min="500" max="900" step="100" value="700" disabled>
-    <label class="slider" for="opacity">Rest-of-word opacity <output id="opacity-value"></output></label>
-    <input id="opacity" type="range" min="0.4" max="1" step="0.05" value="1" disabled>
-    <p class="hint">Changes apply live. Site preferences are saved even while globally paused.</p>
-    <p class="hint">Site shortcut: Alt+Shift+R</p>
-    <p id="status" role="status" aria-live="polite"></p>
-  </main><script src="popup.js"></script>
-</body>
-</html>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>ADHD Reader</title><link rel="stylesheet" href="popup.css"><link rel="stylesheet" href="content.css"></head><body>
+<header><img src="icons/48.png" width="40" height="40" alt=""><div><h1>ADHD Reader</h1><p>A little emphasis. A clearer rhythm.</p></div></header><main>
+<section class="card"><label class="toggle"><span>Focus reading</span><input id="enabled" type="checkbox" disabled></label><label class="toggle"><span>Enable on this site</span><input id="site" type="checkbox" disabled></label><p id="hostname" class="hint">Checking this page…</p><button id="context" class="primary" hidden>Open in ADHD Reader</button></section>
+<section class="card"><h2>Your reading style</h2><div class="presets" aria-label="Reading presets"><button data-preset="Light">Light</button><button data-preset="Balanced">Balanced</button><button data-preset="Strong">Strong</button></div><label class="slider" for="ratio">Emphasis ratio <output id="ratio-value"></output></label><input id="ratio" type="range" min=".2" max=".7" step=".01" value=".45" disabled><label class="slider" for="weight">Emphasis weight <output id="weight-value"></output></label><input id="weight" type="range" min="500" max="900" step="100" value="700" disabled><label class="slider" for="opacity">Remaining text <output id="opacity-value"></output></label><input id="opacity" type="range" min=".4" max="1" step=".05" value="1" disabled><div class="preview" id="preview" aria-label="Live reading preview"></div></section>
+<section class="card"><label class="toggle"><span>Handle PDFs with ADHD Reader</span><input id="pdfMimeHandler" type="checkbox" disabled></label><p id="pdf-hint" class="hint">PDFs stay local. Text view works best with selectable text.</p><details><summary>Disabled sites <span id="site-count"></span></summary><ul id="disabled-sites"></ul><p id="empty" class="hint">No disabled sites. Use the site switch above to add one.</p></details></section>
+<p class="hint footer">Auto-on for supported pages · Alt+Shift+R toggles a site.<br>Drag to preview; release to save.</p><p id="status" role="status" aria-live="polite"></p></main><script src="lib/emphasize.js"></script><script src="popup.js"></script></body></html>

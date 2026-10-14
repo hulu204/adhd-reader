@@ -3,7 +3,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 mkdir -p dist
 rm -f dist/adhd-reader.zip
-files=(manifest.json background.js content.js content.css popup.html popup.js popup.css icons)
+files=(manifest.json background.js content.js content.css popup.html popup.js popup.css icons lib viewer vendor content-docs.js content-docs-main.js content-docs-init.js content-docs.css)
 if command -v zip >/dev/null 2>&1; then
   zip -qr dist/adhd-reader.zip "${files[@]}"
 else

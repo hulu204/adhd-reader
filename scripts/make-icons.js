@@ -23,10 +23,13 @@ for (const size of [16, 48, 128]) {
   const raw = Buffer.alloc(size * (1 + size * 4));
   for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
     const u = (x + 0.5) / size, v = (y + 0.5) / size;
-    const bar = (u >= 0.23 && u < 0.43 && v >= 0.22 && v < 0.78)
-      || (u >= 0.55 && u < 0.77 && v >= 0.22 && v < 0.61);
+    const dx = Math.max(.16 - u, 0, u - .84), dy = Math.max(.16 - v, 0, v - .84);
+    const inside = dx * dx + dy * dy <= .14 * .14;
+    const line = (v >= .27 && v < .37) || (v >= .46 && v < .56) || (v >= .65 && v < .75);
+    const focus = line && u >= .23 && u < .43;
+    const rest = line && u >= .48 && u < (v > .6 ? .65 : .78);
     const offset = y * (1 + size * 4) + 1 + x * 4;
-    raw.set(bar ? [224, 235, 255, 255] : [23, 32, 51, 255], offset);
+    raw.set(!inside ? [0, 0, 0, 0] : focus ? [130, 235, 211, 255] : rest ? [230, 239, 255, 255] : [38, 65 + Math.round(v * 18), 143 + Math.round(u * 30), 255], offset);
   }
   const header = Buffer.alloc(13);
   header.writeUInt32BE(size, 0); header.writeUInt32BE(size, 4);

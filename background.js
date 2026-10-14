@@ -15,3 +15,24 @@ chrome.commands.onCommand.addListener(async (command) => {
     // Chrome internal pages and other restricted pages have no content script.
   }
 });
+
+async function syncPdfHandler() {
+  if (!chrome.mimeHandler) return;
+  const { pdfMimeHandler = true } = await chrome.storage.sync.get('pdfMimeHandler');
+  await chrome.mimeHandler.setMimeHandlerOptions('application/pdf', { enabled: pdfMimeHandler !== false });
+}
+chrome.runtime.onInstalled.addListener(() => syncPdfHandler().catch(console.error));
+chrome.runtime.onStartup.addListener(() => syncPdfHandler().catch(console.error));
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === 'sync' && changes.pdfMimeHandler) syncPdfHandler().catch(console.error);
+});
+chrome.runtime.onMessage.addListener((message, sender, respond) => {
+  if (message.type !== 'adhdr-open-pdf' || sender.id !== chrome.runtime.id) return;
+  (async () => {
+    const url = new URL(message.url);
+    if (!['http:', 'https:', 'file:'].includes(url.protocol)) throw new Error('Unsupported PDF URL');
+    await chrome.tabs.create({ url: chrome.runtime.getURL('viewer/pdf.html') + '?url=' + encodeURIComponent(url.href) });
+    return { ok: true };
+  })().then(respond).catch(() => respond({ ok: false }));
+  return true;
+});

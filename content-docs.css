@@ -1,0 +1,6 @@
+#adhdr-docs-button { position: fixed; right: 24px; bottom: 24px; z-index: 2147483646; border: 0; border-radius: 24px; padding: 14px 22px; background: #315bd6; color: white; font: 600 15px system-ui; box-shadow: 0 6px 24px #0003; cursor: pointer; }
+#adhdr-docs-panel { position: fixed; inset: 5vh 4vw 5vh auto; width: min(680px, 90vw); box-sizing: border-box; overflow: auto; padding: 28px; z-index: 2147483647; background: #fff; color: #172033; border-radius: 20px; box-shadow: 0 12px 80px #0006; font: 15px/1.6 system-ui; color-scheme: light; }
+#adhdr-docs-panel[hidden] { display: none; }
+#adhdr-docs-panel button { padding: 8px 12px; margin-right: 8px; cursor: pointer; }
+#adhdr-docs-panel textarea { width: 100%; min-height: 110px; box-sizing: border-box; margin: 12px 0; font: inherit; }
+#adhdr-docs-panel article { white-space: pre-wrap; font: 19px/1.8 system-ui; overflow-wrap: anywhere; }

@@ -1,27 +1,101 @@
 {
   "manifest_version": 3,
   "name": "ADHD Reader",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A fixation-style reading aid for ADHD readers and speed readers, with adjustable word emphasis.",
-  "permissions": ["storage"],
-  "background": { "service_worker": "background.js" },
+  "permissions": [
+    "storage",
+    "activeTab"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
   "action": {
     "default_title": "ADHD Reader – Focus & Speed Reading",
     "default_popup": "popup.html",
-    "default_icon": { "16": "icons/16.png", "48": "icons/48.png", "128": "icons/128.png" }
+    "default_icon": {
+      "16": "icons/16.png",
+      "48": "icons/48.png",
+      "128": "icons/128.png"
+    }
   },
-  "icons": { "16": "icons/16.png", "48": "icons/48.png", "128": "icons/128.png" },
-  "content_scripts": [{
-    "matches": ["<all_urls>"],
-    "js": ["content.js"],
-    "css": ["content.css"],
-    "run_at": "document_idle",
-    "all_frames": false
-  }],
+  "icons": {
+    "16": "icons/16.png",
+    "48": "icons/48.png",
+    "128": "icons/128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "lib/emphasize.js",
+        "content.js"
+      ],
+      "css": [
+        "content.css"
+      ],
+      "run_at": "document_idle",
+      "all_frames": false,
+      "exclude_matches": [
+        "https://docs.google.com/document/*"
+      ]
+    },
+    {
+      "matches": [
+        "https://docs.google.com/document/*"
+      ],
+      "js": [
+        "content-docs-main.js"
+      ],
+      "world": "MAIN",
+      "run_at": "document_start",
+      "all_frames": false
+    },
+    {
+      "matches": [
+        "https://docs.google.com/document/*"
+      ],
+      "js": [
+        "content-docs-init.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": false
+    },
+    {
+      "matches": [
+        "https://docs.google.com/document/*"
+      ],
+      "js": [
+        "lib/emphasize.js",
+        "content-docs.js"
+      ],
+      "css": [
+        "content.css",
+        "content-docs.css"
+      ],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ],
   "commands": {
     "toggle-site": {
-      "suggested_key": { "default": "Alt+Shift+R" },
+      "suggested_key": {
+        "default": "Alt+Shift+R"
+      },
       "description": "Toggle ADHD Reader on the current site"
+    }
+  },
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*",
+    "file:///*"
+  ],
+  "mime_types_handler": {
+    "application/pdf": {
+      "handler_url": "viewer/pdf.html",
+      "can_embed": true
     }
   }
 }
