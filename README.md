@@ -1,8 +1,21 @@
-# ADHD Reader
+<h1 align="center"><img width="32" height="32" alt="ADHD Reader logo" src="assets/logo.png" /><br />ADHD Reader</h1>
+<h3 align="center">
+  A Chrome extension for focused reading on any website.<br />It bolds the opening letters of every word, so your eyes have somewhere to land.
+</h3>
 
-A Chrome extension for focused reading on any website. It bolds the opening letters of every word — fixation-style emphasis — so your eyes have somewhere to land and the paragraph finally sticks.
+<p align="center">
+  <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/license-MIT-blue.svg"></a>
+  <a href="https://chromewebstore.google.com" title="Chrome Web Store listing pending review"><img alt="Chrome Web Store" src="https://img.shields.io/badge/Chrome%20Web%20Store-pending%20review-orange.svg"></a>
+  <img alt="Manifest" src="https://img.shields.io/badge/manifest-V3-34A853.svg">
+  <img alt="Dependencies" src="https://img.shields.io/badge/dependencies-0-8B5CF6.svg">
+</p>
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+## Why ADHD Reader?
+
+- **Auto-on everywhere:** works on supported pages the moment you install it — no per-page clicks, no reader-mode shell.
+- **Native PDF text view:** Chrome 151+ MIME-handler integration, powered by a bundled pdf.js that never leaves your machine.
+- **Local-only:** in-place text transformation that restores the original page — and your edits — when disabled.
+- **Zero telemetry:** no accounts, no server, no analytics, no remote code.
 
 ## How it works
 
@@ -90,6 +103,16 @@ No accounts, no server, no analytics, no remote code. Page text is processed loc
 No build dependencies. Regenerate icons with `node scripts/make-icons.js`, syntax-check with `node --check`, run behavioral checks with `node scripts/check.js` (Node 20+), and package with `bash scripts/build.sh` → `dist/adhd-reader.zip`.
 
 To refresh the bundled pdf.js: `npm pack pdfjs-dist@5.4.149`, then copy `build/pdf.min.mjs`, `build/pdf.worker.min.mjs`, and `LICENSE` into `vendor/pdfjs/`. Keep library and worker versions identical.
+
+## Alternatives
+
+This space has several options worth knowing:
+
+- [Jiffy Reader](https://github.com/ansh/jiffyreader-public-archive) — pioneered free bionic-style reading; the original repository was archived in 2025.
+- [Hyper Bold](https://chromewebstore.google.com/detail/hyper-bold/bjicoipahmlimcmjoejgaoneibennoab) — a lightweight closed-source alternative.
+- [Bionic Reading®](https://bionic-reading.com/) — the trademarked original; paid.
+
+If ADHD Reader isn't for you, one of these might be.
 
 ## License
 
