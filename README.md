@@ -1,5 +1,42 @@
 # ADHD Reader – Focus & Speed Reading
 
+<p align="left"><img src="assets/logo.png" width="96" alt="ADHD Reader logo"></p>
+
+**A fixation-style reading aid for ADHD readers and speed readers.** ADHD Reader bolds the opening letters of every word, giving your eyes a fixed point to land on — so attention stops drifting and the paragraph finally sticks.
+
+![main screenshot](assets/screenshot-main.png)
+
+A little emphasis. A clearer rhythm. Auto-on for supported pages, three presets, live-preview sliders, a local PDF text view, and a Google Docs reader panel. No accounts, no tracking, no server.
+
+## Why you can trust this extension
+
+- **No accounts, no server, no analytics.** There is nothing to sign into and nowhere for your data to go — the extension has zero runtime dependencies on any backend.
+- **Zero telemetry.** No analytics, no crash reporting, no fingerprinting. Your reading never leaves your browser.
+- **All text processing is local.** Page text is transformed in-place in your browser. PDFs are processed by a bundled pdf.js copy on your machine — nothing is uploaded, ever.
+- **The code is open.** Every release is built from this repository. Read it, audit it, fork it.
+
+## How it compares
+
+| | ADHD Reader | Bionic Reading® official | Jiffy Reader | Hyper Bold |
+|---|---|---|---|---|
+| Price | Free, open source | ~$50 | Free (archived; **2025 ownership change → malware, removed from store**) | Free |
+| Trust model | Open code, zero telemetry | Closed, processes website content | Open source until sold | Closed |
+| Works automatically | Yes | Manual, per page | Yes | Yes |
+| PDFs | Native MIME-handler text view (Chrome 151+) | No | Separate reader page | No |
+| Google Docs | Focus Reader panel | No | No | No |
+| CJK scripts | Wisely skipped (no fake bolding) | – | – | – |
+| Restores original page | Yes, preserves your edits | Reader-mode shell | Yes | Yes |
+
+*Bionic Reading® is a registered trademark of its owner; this project is independent and uses no trademarked terms in its code or listings.*
+
+## Support the project
+
+ADHD Reader is free and always will be. If it helps you read, you can sponsor development here (link coming with the first release) — or better, star the repo and leave a review.
+
+---
+
+# ADHD Reader – Focus & Speed Reading
+
 Version 0.2.0 is a Chrome Manifest V3 extension that applies fixation-style emphasis to word beginnings. Preferences differ; it makes no medical or reading-speed claims.
 
 ## Reading controls
