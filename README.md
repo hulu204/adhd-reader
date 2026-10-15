@@ -1,76 +1,81 @@
-# ADHD Reader – Focus & Speed Reading
+# ADHD Reader
 
-<p align="left"><img src="assets/logo.png" width="96" alt="ADHD Reader logo"></p>
+A Chrome extension for focused reading on any website. It bolds the opening letters of every word — fixation-style emphasis — so your eyes have somewhere to land and the paragraph finally sticks.
 
-**A fixation-style reading aid for ADHD readers and speed readers.** ADHD Reader bolds the opening letters of every word, giving your eyes a fixed point to land on — so attention stops drifting and the paragraph finally sticks.
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-![main screenshot](assets/screenshot-main.png)
+## How it works
 
-A little emphasis. A clearer rhythm. Auto-on for supported pages, three presets, live-preview sliders, a local PDF text view, and a Google Docs reader panel. No accounts, no tracking, no server.
+![ADHD Reader in action](assets/screenshot-main.png)
 
-## Why you can trust this extension
+Supported pages get emphasis automatically — no per-page clicks, no reader-mode shell. The original page layout, images, and code blocks are untouched; only word beginnings are bolded. Use the toolbar popup for Light / Balanced / Strong presets and fine-grained sliders, or press `Alt+Shift+R` to toggle the current site.
 
-- **No accounts, no server, no analytics.** There is nothing to sign into and nowhere for your data to go — the extension has zero runtime dependencies on any backend.
-- **Zero telemetry.** No analytics, no crash reporting, no fingerprinting. Your reading never leaves your browser.
-- **All text processing is local.** Page text is transformed in-place in your browser. PDFs are processed by a bundled pdf.js copy on your machine — nothing is uploaded, ever.
-- **The code is open.** Every release is built from this repository. Read it, audit it, fork it.
+## Installation
 
-## How it compares
+### Chrome Web Store
 
-| | ADHD Reader | Bionic Reading® official | Jiffy Reader | Hyper Bold |
-|---|---|---|---|---|
-| Price | Free, open source | ~$50 | Free (archived; **2025 ownership change → malware, removed from store**) | Free |
-| Trust model | Open code, zero telemetry | Closed, processes website content | Open source until sold | Closed |
-| Works automatically | Yes | Manual, per page | Yes | Yes |
-| PDFs | Native MIME-handler text view (Chrome 151+) | No | Separate reader page | No |
-| Google Docs | Focus Reader panel | No | No | No |
-| CJK scripts | Wisely skipped (no fake bolding) | – | – | – |
-| Restores original page | Yes, preserves your edits | Reader-mode shell | Yes | Yes |
+Listing is pending review. Link will appear here once published.
 
-*Bionic Reading® is a registered trademark of its owner; this project is independent and uses no trademarked terms in its code or listings.*
+### From source
 
-## Support the project
+1. Clone this repository
+2. Open `chrome://extensions`, enable **Developer mode**
+3. Click **Load unpacked** and select the repository directory
+4. Reload existing tabs after installing or updating
 
-ADHD Reader is free and always will be. If it helps you read, you can sponsor development here (link coming with the first release) — or better, star the repo and leave a review.
+## Features
 
----
+- Automatic emphasis on supported sites; nothing to click per page
+- Light / Balanced / Strong presets, plus ratio (20–70%), weight (500–900), and remaining-text opacity (40–100%)
+- Live sentence preview — drag a slider, watch the page change, release to save
+- Per-site on/off (`Alt+Shift+R`) and a managed disabled-sites list
+- In-place text transformation: inputs, code, editable regions, and graphics are skipped; disabling restores the page while preserving edits
+- Incremental idle-time processing for dynamic pages — no jank on heavy sites
+- PDF text reading view via a bundled, fully local pdf.js (Chrome 151+ MIME-handler integration)
+- Google Docs "Focus Reader" panel for canvas-rendered documents
+- Unicode grapheme clusters and RTL supported; CJK scripts are intentionally left unchanged
+- No accounts, no server, no analytics, no remote code
 
-# ADHD Reader – Focus & Speed Reading
+## Settings
 
-Version 0.2.0 is a Chrome Manifest V3 extension that applies fixation-style emphasis to word beginnings. Preferences differ; it makes no medical or reading-speed claims.
+Open the toolbar popup on any page:
 
-## Reading controls
+| Control | Effect |
+|---|---|
+| Focus reading | Global on/off |
+| Enable on this site | Per-site toggle (same as `Alt+Shift+R`) |
+| Light / Balanced / Strong | Starting points for the sliders |
+| Emphasis ratio | How much of each word is bolded |
+| Emphasis weight | Bold stroke weight (500–900) |
+| Remaining text | Opacity of the un-bolded part |
 
-Supported websites are enabled automatically. The popup offers Light / Balanced / Strong presets, adjustable emphasis ratio (20–70%), weight (500–900), remaining-text opacity (40–100%), a live sentence preview, and global/site switches. Sliders preview on the active page and save on release. Manage disabled hostnames in the popup; the default blacklist is empty. Alt+Shift+R toggles the current site (customize at `chrome://extensions/shortcuts`).
+Sliders preview on the active page while dragging and save on release. Preferences sync through your browser profile.
 
-Dynamic website text is processed in small idle batches. Code, inputs, contenteditable, graphics, and embedded frames are skipped. Disabling restores text while preserving page edits. Unicode grapheme clusters and RTL are supported; Chinese, Japanese, and Korean scripts are left unchanged. Website text nodes over 4,000 UTF-16 units, shadow DOM, protected Chrome pages, and the Web Store are not processed. Complex websites may need a site opt-out. Generic scripts use `all_frames: false`.
+## PDF reading view
 
-## PDFs
-
-Chrome's built-in PDF viewer cannot have its text rewritten by content scripts. ADHD Reader supplies a separate, local text reading view using Mozilla pdf.js **5.4.149**. Its library and worker are bundled under `vendor/pdfjs/`, with the upstream Apache license; no remote code is loaded.
-
-On Chrome 151+, the `application/pdf` MIME handler reads Chrome's one-use response stream, keeps the original URL in the address bar, and supports embedded PDFs. “Handle PDFs with ADHD Reader” defaults to on; switch it off in the popup to use Chrome's native viewer for future loads. A handler-view button returns the current stream to Chrome's viewer. See [Chrome's public MIME-handler API](https://developer.chrome.com/docs/extensions/reference/api/mimeHandler).
-
-The popup shows **Open in ADHD Reader** for PDF pathnames, recognized Chrome PDF URLs, and PDF content/embed hints. The standalone `viewer/pdf.html?url=` path accepts HTTP(S) and file URLs and fetches the PDF from its original source. Unlike the stream path, this makes a second request: expired links, POST-only documents, authentication, server restrictions, or inaccessible local files can fail. File URL fetching requires “Allow access to file URLs”; the viewer also offers a local PDF picker that needs no upload. MIME handling of local files does not require that file-access switch.
-
-Text is extracted per page with `getTextContent` and follows live sync settings, global enable, and the original hostname's opt-out. This is a text view: layout, images, tables, and reading order may differ. Scanned/image-only PDFs have no text without OCR (not included). Password-protected PDFs may fail; use the native viewer. Large documents consume memory as extracted pages accumulate. When fetching or parsing fails, the viewer explains the local-file/native-viewer fallbacks.
+Chrome's built-in PDF viewer cannot be restyled by extensions, so ADHD Reader ships its own local text view powered by pdf.js 5.4.149 (bundled under `vendor/pdfjs/`, Apache-2.0). On Chrome 151+ the `application/pdf` MIME handler keeps the original URL in the address bar and supports embedded PDFs; a viewer button hands the stream back to Chrome's native viewer. The popup also offers **Open in ADHD Reader** for PDF URLs and local files (the local file picker needs no file-access switch). This is a text view: layout and images may differ, and scanned PDFs without a text layer cannot be emphasized.
 
 ## Google Docs
 
-On `https://docs.google.com/document/*`, use the floating **Focus Reader** button or the contextual popup action. Google Docs renders text to canvas, so the extension does not promise in-place emphasis and never edits the document.
+Docs renders text to canvas, so in-place bolding is not possible. On `docs.google.com/document/*` a floating **Focus Reader** button opens a panel that formats extracted or pasted text with your live settings. The extension never edits the document.
 
-A MAIN-world document-start bridge sets `window._docs_annotate_canvas_by_ext` to the extension ID. Google may only honor this for whitelisted extensions. The panel first tries annotated canvas SVG `rect[aria-label]` text; only currently rendered text may be available. Scroll and refresh, and verify completeness. If extraction is unavailable, close the panel, select and copy document text, then reopen and paste. No clipboard API permission is requested. The panel formats pasted/extracted text locally with the same shared algorithm and live settings.
+## Privacy
 
-## Installation and privacy
+No accounts, no server, no analytics, no remote code. Page text is processed locally and never uploaded. PDFs are parsed by the bundled pdf.js on your machine. See [PRIVACY.md](PRIVACY.md).
 
-Open `chrome://extensions`, enable Developer mode, and choose **Load unpacked** with this directory. Reload existing website/Docs tabs after installing or updating.
+## Limitations & FAQ
 
-Permissions: `storage` saves preferences; `activeTab` allows the popup to inspect the user-invoked tab URL, including PDF tabs where content scripts cannot run. HTTP(S)/file host permissions allow standalone PDF fetching. Broad `<all_urls>` content-script access enables local website emphasis. No analytics, tracking, developer server, PDF upload, or remote runtime code is present. PDF URL mode requests the original document from its source. See [PRIVACY.md](PRIVACY.md).
+- **Which pages are not processed?** Chrome internal pages, the Chrome Web Store, protected pages, and text nodes over 4,000 UTF-16 units. Shadow DOM and cross-origin iframes are skipped in v0.2.
+- **Chinese / Japanese / Korean?** Intentionally unchanged — letter-by-letter emphasis does not apply to logographic scripts.
+- **A specific site looks wrong?** Toggle it off with `Alt+Shift+R`; complex apps sometimes need a site opt-out.
+- **Why is my review taking long?** Broad host permissions (`<all_urls>` is required to work on any page) trigger Chrome Web Store's in-depth review.
 
 ## Development
 
-No application build dependencies, React, or TypeScript are needed. Regenerate icons with `node scripts/make-icons.js`, check each `.js` and `.mjs` with `node --check`, run `node scripts/check.js` for behavioral checks (Node 20+), and run `bash scripts/build.sh` to produce `dist/adhd-reader.zip`.
+No build dependencies. Regenerate icons with `node scripts/make-icons.js`, syntax-check with `node --check`, run behavioral checks with `node scripts/check.js` (Node 20+), and package with `bash scripts/build.sh` → `dist/adhd-reader.zip`.
 
-To refresh the pinned vendor files: `npm pack pdfjs-dist@5.4.149`, then extract only `build/pdf.min.mjs`, `build/pdf.worker.min.mjs`, and `LICENSE` into `vendor/pdfjs/`. Keep library and worker versions identical.
+To refresh the bundled pdf.js: `npm pack pdfjs-dist@5.4.149`, then copy `build/pdf.min.mjs`, `build/pdf.worker.min.mjs`, and `LICENSE` into `vendor/pdfjs/`. Keep library and worker versions identical.
 
-Automated checks cover syntax, shared emphasis behavior, PDF extraction and viewer stream/URL paths. Browser integration, accessibility, real Docs whitelist behavior, and unusual website/PDF typography still require release QA.
+## License
+
+[MIT](LICENSE) — the bundled pdf.js is Apache-2.0 (see `vendor/pdfjs/LICENSE`).
