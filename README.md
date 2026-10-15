@@ -36,6 +36,21 @@ Listing is pending review. Link will appear here once published.
 - Unicode grapheme clusters and RTL supported; CJK scripts are intentionally left unchanged
 - No accounts, no server, no analytics, no remote code
 
+## Comparison
+
+| | ADHD Reader | [Jiffy Reader](https://github.com/ansh/jiffyreader-public-archive) | [Hyper Bold](https://chromewebstore.google.com/detail/hyper-bold/bjicoipahmlimcmjoejgaoneibennoab) | [Bionic Reading®](https://bionic-reading.com/) |
+|---|:---:|:---:|:---:|:---:|
+| Free | ✅ | ✅ | ✅ | 💰 paid |
+| Open source | ✅ | ⚠️ archived 2025 | ❌ | ❌ |
+| Automatic on every page | ✅ | ✅ | ✅ | ❌ per-page clicks |
+| PDF text view | ✅ native MIME handler | ✅ | ❌ | ❌ |
+| Google Docs panel | ✅ | ❌ | ❌ | ❌ |
+| CJK scripts left unchanged | ✅ | ❌ | ❌ | ➖ |
+| Restores page on disable | ✅ | ⚠️ | ⚠️ | n/a (reader shell) |
+| Zero accounts / server / telemetry | ✅ | ✅ | ❓ closed | ❓ closed |
+
+*Bionic Reading® is a registered trademark of its respective owner; this project is independent and uses no trademarked terms in code or listings.*
+
 ## Settings
 
 Open the toolbar popup on any page:
