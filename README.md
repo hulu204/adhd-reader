@@ -5,7 +5,7 @@
 
 <p align="center">
   <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/license-MIT-blue.svg"></a>
-  <a href="https://chromewebstore.google.com" title="Chrome Web Store listing pending review"><img alt="Chrome Web Store" src="https://img.shields.io/badge/Chrome%20Web%20Store-pending%20review-orange.svg"></a>
+  <a href="https://chromewebstore.google.com/detail/adhd-reader/kcijmigamanbmbpnogjafedaicjfagob"><img alt="Chrome Web Store" src="https://img.shields.io/badge/Chrome%20Web%20Store-v0.2.0-34A853.svg?logo=googlechrome&logoColor=white"></a>
   <img alt="Manifest" src="https://img.shields.io/badge/manifest-V3-34A853.svg">
   <img alt="Dependencies" src="https://img.shields.io/badge/dependencies-0-8B5CF6.svg">
 </p>
@@ -27,7 +27,7 @@ Supported pages get emphasis automatically — no per-page clicks, no reader-mod
 
 ### Chrome Web Store
 
-Listing is pending review. Link will appear here once published.
+[![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-ADHD%20Reader-34A853.svg?logo=googlechrome&logoColor=white)](https://chromewebstore.google.com/detail/adhd-reader/kcijmigamanbmbpnogjafedaicjfagob)
 
 ### From source
 
