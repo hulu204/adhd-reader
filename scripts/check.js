@@ -98,17 +98,36 @@ async function docsChecks() {
 }
 Element.prototype.alsoLabel = function(text) { this.attributes['aria-label'] = text; return this; };
 async function backgroundChecks() {
-  const events = {}, stored = { pdfMimeHandler: false }, handled = [], opened = [];
-  const context = vm.createContext({ console, URL, chrome: {
+  const events = {}, stored = { pdfMimeHandler: false }, local = {}, handled = [], opened = [];
+  const context = vm.createContext({ console, URL, setTimeout, chrome: {
     commands: { onCommand: { addListener() {} } }, tabs: { create: async options => opened.push(options) },
     runtime: { id: 'test', getURL: file => 'chrome-extension://test/' + file,
       onInstalled: { addListener: fn => { events.install = fn; } }, onStartup: { addListener() {} },
-      onMessage: { addListener: fn => { events.message = fn; } } },
-    storage: { sync: { get: async () => stored }, onChanged: { addListener: fn => { events.change = fn; } } },
+      onMessage: { addListener: fn => { (events.messages ||= []).push(fn); events.message = fn; } } },
+    storage: { local: { get: async () => { await new Promise(r => setTimeout(r, 1)); return { ...local }; }, set: async values => Object.assign(local, values) }, sync: { get: async () => stored }, onChanged: { addListener: fn => { events.change = fn; } } },
     mimeHandler: { setMimeHandlerOptions: async (type, options) => handled.push({ type, options }) }
   } });
+  context.importScripts = file => vm.runInContext(read(file), context);
   vm.runInContext(read('background.js'), context);
-  await context.syncPdfHandler(); assert.equal(handled[0].options.enabled, false);
+  // Concurrent tabs must not overwrite each other's page hashes (serialized in the worker).
+  const rp = events.messages[0], tab = { id: 'test', tab: { id: 1 } };
+  const hashes = ['00000001', '00000002', '00000003'];
+  for (const hash of hashes) rp({ type: 'rp-record', hash }, tab);
+  rp({ type: 'rp-record', hash: 'not-a-hash' }, tab);
+  rp({ type: 'rp-record', hash: '00000009' }, { id: 'other', tab: { id: 2 } });
+  await new Promise(r => setTimeout(r, 50));
+  assert.deepEqual([...local.rp_pages], hashes);
+  delete local.rp_pages;
+  await events.install({ reason: 'install' });
+  assert.equal(handled[0].options.enabled, false);
+  assert.ok(Number.isFinite(local.rp_installedAt));
+  local.rp_installedAt = 123;
+  await events.install({ reason: 'update' });
+  assert.equal(local.rp_installedAt, 123);
+  delete local.rp_installedAt;
+  await events.install({ reason: 'update' });
+  assert.ok(Number.isFinite(local.rp_installedAt));
+  handled.length = 1;
   stored.pdfMimeHandler = true; await context.syncPdfHandler(); assert.equal(handled[1].options.enabled, true);
   const send = url => new Promise(resolve => events.message({ type: 'adhdr-open-pdf', url }, { id: 'test' }, resolve));
   assert.equal((await send('https://example.com/test.pdf')).ok, true); assert.equal(opened.length, 1);
@@ -143,17 +162,82 @@ async function pdfExtractionCheck() {
     assert.equal(text.items.map(item => item.str).join(''), 'Focus reading fixture');
   } finally { await task.destroy(); }
 }
+
+async function ratingChecks() {
+  const context = vm.createContext({});
+  vm.runInContext(read('lib/rating.js'), context);
+  const { shouldShow, recordPage } = context.GripreadRating;
+  const day = 24 * 60 * 60 * 1000, now = 10 * day;
+  const eligible = { installedAt: now - 5 * day, pages: Array(10).fill('hash'), now };
+  assert.equal(shouldShow({ installedAt: now, pages: [], now }), false);
+  assert.equal(shouldShow({ ...eligible, pages: Array(9).fill('hash') }), false);
+  assert.equal(shouldShow({ ...eligible, installedAt: now - 4.9 * day }), false);
+  assert.equal(shouldShow(eligible), true);
+  for (const state of ['shown', 'dismissed', 'rated', 'reported', null]) assert.equal(shouldShow({ ...eligible, state }), false);
+  for (const installedAt of [undefined, null, NaN, '0']) assert.equal(shouldShow({ ...eligible, installedAt }), false);
+  const stored = {}; let writes = 0;
+  const storage = { get: async () => ({ ...stored }), set: async values => { writes++; Object.assign(stored, values); } };
+  await recordPage(storage, 'https://example.com/article');
+  await recordPage(storage, 'https://example.com/article');
+  assert.equal(writes, 1);
+  assert.match(stored.rp_pages[0], /^[0-9a-f]{8}$/);
+  for (let i = 0; i < 20; i++) await recordPage(storage, 'https://example.com/' + i);
+  assert.equal(stored.rp_pages.length, 10); assert.equal(writes, 10);
+  await recordPage({ get: async () => { throw Error('unavailable'); } }, 'page');
+  await recordPage({ get: async () => ({}), set: async () => { throw Error('unavailable'); } }, 'page');
+
+  for (const [id, state, url] of [
+    ['rating-rate', 'rated', 'https://chromewebstore.google.com/detail/kcijmigamanbmbpnogjafedaicjfagob/reviews'],
+    ['rating-report', 'reported', 'https://github.com/hulu204/adhd-reader/issues'],
+    ['rating-dismiss', 'dismissed', undefined]
+  ]) {
+    const env = environment(), local = { rp_installedAt: 0, rp_pages: Array(10).fill('hash') }, opened = [];
+    env.context.chrome.storage.local = { get: async () => ({ ...local }), set: async values => Object.assign(local, values) };
+    env.context.chrome.tabs = { create: async options => opened.push(options.url) };
+    env.context.setTimeout = fn => fn();
+    vm.runInContext(read('lib/rating.js'), env.context);
+    vm.runInContext(read('popup.js').replace(/^init\(\)\.catch.*$/m, ''), env.context);
+    const card = env.context.document.getElementById('rating');
+    card.hidden = true; card.classList = { add() {} };
+    await env.context.initRating();
+    assert.equal(local.rp_state, 'shown'); assert.equal(card.hidden, false);
+    await env.ids.get(id).onclick();
+    assert.equal(local.rp_state, state); assert.equal(card.hidden, true);
+    assert.deepEqual(opened, url ? [url] : []);
+    await env.context.initRating(); assert.equal(card.hidden, true);
+  }
+}
+function wordingChecks() {
+  const forbidden = new RegExp(String.fromCharCode(98, 105, 111, 110, 105, 99), 'i');
+  const excluded = new Set(['vendor', '.git', 'COMPETITOR-REVIEWS-zh.md', 'REVIEW.md', 'NOTES-zh.md']);
+  function walk(directory) {
+    for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+      if (excluded.has(entry.name)) continue;
+      const file = path.join(directory, entry.name);
+      if (entry.isDirectory()) walk(file);
+      else if (entry.isFile()) assert.ok(!forbidden.test(fs.readFileSync(file, 'utf8')), `Disallowed wording in ${path.relative(root, file)}`);
+    }
+  }
+  walk(root);
+}
+
 async function main() {
+  await ratingChecks(); wordingChecks();
   emphasisChecks();
   await viewerChecks('stream'); await viewerChecks('url'); await viewerChecks('bad-url');
   await viewerChecks('stream', { pdfMimeHandler: false });
   await viewerChecks('url', { disabledSites: { 'example.com': true } });
   await pdfExtractionCheck(); await docsChecks(); await backgroundChecks();
   const manifest = JSON.parse(read('manifest.json'));
-  assert.equal(manifest.version, '0.2.0');
+  assert.equal(manifest.version, '0.3.0');
+  assert.equal(manifest.name, 'Gripread — ADHD Reader & Focus Reading (PDF, Open Source)');
+  assert.equal(manifest.short_name, 'Gripread');
+  assert.deepEqual(manifest.permissions, ['storage', 'activeTab']);
+  assert.ok(!Object.hasOwn(manifest, 'key'));
+  assert.ok(manifest.content_scripts[0].js.indexOf('lib/rating.js') < manifest.content_scripts[0].js.indexOf('content.js'));
   assert.ok(manifest.content_scripts.every(script => script.all_frames === false));
   assert.equal(manifest.mime_types_handler['application/pdf'].handler_url, 'viewer/pdf.html');
   assert.ok(fs.existsSync(path.join(root, 'COMPETITOR-REVIEWS-zh.md')));
-  console.log('PASS: shared emphasis, stream/URL reader paths, disabled handler, URL rejection, real bundled PDF extraction, Docs extraction/paste/settings, background MIME toggle, manifest.');
+  console.log('PASS: shared emphasis, stream/URL reader paths, disabled handler, URL rejection, real bundled PDF extraction, Docs extraction/paste/settings, background MIME toggle, rating eligibility/recording/actions, wording, manifest.');
 }
 main().catch(error => { console.error(error); process.exitCode = 1; });

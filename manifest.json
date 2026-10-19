@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "ADHD Reader",
-  "version": "0.2.0",
-  "description": "A fixation-style reading aid for ADHD readers and speed readers, with adjustable word emphasis.",
+  "name": "Gripread — ADHD Reader & Focus Reading (PDF, Open Source)",
+  "version": "0.3.0",
+  "description": "Open-source ADHD reading aid: bolds word starts on any page, auto-on, clean undo. Local-only, no tracking. PDF view + Docs panel.",
   "permissions": [
     "storage",
     "activeTab"
@@ -11,7 +11,7 @@
     "service_worker": "background.js"
   },
   "action": {
-    "default_title": "ADHD Reader – Focus & Speed Reading",
+    "default_title": "Gripread",
     "default_popup": "popup.html",
     "default_icon": {
       "16": "icons/16.png",
@@ -31,6 +31,7 @@
       ],
       "js": [
         "lib/emphasize.js",
+        "lib/rating.js",
         "content.js"
       ],
       "css": [
@@ -84,7 +85,7 @@
       "suggested_key": {
         "default": "Alt+Shift+R"
       },
-      "description": "Toggle ADHD Reader on the current site"
+      "description": "Toggle Gripread on the current site"
     }
   },
   "host_permissions": [
@@ -97,5 +98,6 @@
       "handler_url": "viewer/pdf.html",
       "can_embed": true
     }
-  }
+  },
+  "short_name": "Gripread"
 }

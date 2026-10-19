@@ -1,6 +1,6 @@
 # Privacy
 
-ADHD Reader collects no page content or analytics. Website, Docs, pasted text, and PDF content are processed locally, never uploaded to a developer server, and never stored by the extension. There is no tracking, analytics, or remote runtime code.
+Gripread (formerly ADHD Reader) collects no page content or analytics. Website, Docs, pasted text, and PDF content are processed locally, never uploaded to a developer server, and never stored by the extension. There is no tracking, analytics, or remote runtime code.
 
 Chrome sync stores global enable, emphasis ratio/weight/opacity, disabled hostnames, and the PDF-handler preference. Chrome may sync these through your account according to browser settings. There is no developer-operated server.
 
@@ -9,3 +9,5 @@ Chrome sync stores global enable, emphasis ratio/weight/opacity, disabled hostna
 The `<all_urls>` content-script match grants broad website access for automatic local formatting; Chrome may show a broad access warning. Generic scripts run only in the top frame. Docs uses a separate panel and a document-start annotation hint, which Google may ignore. Clipboard text is accessed only through the user's paste action; no clipboard permission is requested. The PDF MIME handler can render embedded documents without enabling generic content scripts in all frames.
 
 Removing the extension removes locally stored preferences; Chrome manages synced preference retention.
+
+The optional rating prompt stores its install/upgrade start time (`rp_installedAt`), up to ten distinct page hashes (`rp_pages`), and prompt status (`rp_state`) in `chrome.storage.local`. Pages count after emphasis is applied. Hashes use origin and pathname; URLs and hostnames are not stored in these counters. These values stay local and are never transmitted. The prompt appears once after five days and ten pages. Its buttons open the Chrome Web Store reviews page or GitHub issue form only when clicked.

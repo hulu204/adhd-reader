@@ -25,7 +25,7 @@ chrome.runtime.onMessage.addListener((message, _sender, respond) => {
 });
 fallback.onclick = async () => {
   try { await chrome.mimeHandler.abortAndFallbackToNativeHandler(); }
-  catch { status.textContent = 'Could not switch viewers. Turn off “Handle PDFs with ADHD Reader” in the popup, then reload the original PDF.'; }
+  catch { status.textContent = 'Could not switch viewers. Turn off “Handle PDFs with Gripread” in the popup, then reload the original PDF.'; }
 };
 async function load(data, label) {
   const token = ++generation;

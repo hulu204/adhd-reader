@@ -7,7 +7,7 @@
   const originals = new Map();
   let settings = { ...defaults }, active = false, scheduled = false;
   let roots = new Set(), stack = [], updates = null;
-  let loaded = false;
+  let loaded = false, ratingRecorded = false;
   const pending = {};
   const eligible = (node) => node.parentElement && !node.parentElement.closest(skipped)
     && node.parentElement.namespaceURI === 'http://www.w3.org/1999/xhtml' && letters.test(node.data);
@@ -20,6 +20,11 @@
     if (!parts.length) return;
     originals.set(wrapper, { node, source, parts });
     node.replaceWith(wrapper);
+    if (!ratingRecorded) {
+      ratingRecorded = true;
+      try { chrome.runtime.sendMessage({ type: 'rp-record', hash: GripreadRating.hashPage(location.origin + location.pathname) }).catch(() => {}); }
+      catch { /* Reading works even when local storage is unavailable. */ }
+    }
   }
   function restore(wrapper, original) {
     // Preserve edits made by the host page instead of resurrecting stale source text.

@@ -1,3 +1,8 @@
+importScripts('lib/rating.js');
+const recordRatingPage = GripreadRating.createRecorder(chrome.storage.local);
+chrome.runtime.onMessage.addListener((message, sender) => {
+  if (message?.type === 'rp-record' && sender.id === chrome.runtime.id && sender.tab) recordRatingPage(message.hash);
+});
 /* Ask the content script for its hostname: no tabs or activeTab permission needed. */
 chrome.commands.onCommand.addListener(async (command) => {
   if (command !== 'toggle-site') return;
@@ -21,7 +26,13 @@ async function syncPdfHandler() {
   const { pdfMimeHandler = true } = await chrome.storage.sync.get('pdfMimeHandler');
   await chrome.mimeHandler.setMimeHandlerOptions('application/pdf', { enabled: pdfMimeHandler !== false });
 }
-chrome.runtime.onInstalled.addListener(() => syncPdfHandler().catch(console.error));
+chrome.runtime.onInstalled.addListener(async () => {
+  await syncPdfHandler().catch(console.error);
+  try {
+    const { rp_installedAt } = await chrome.storage.local.get('rp_installedAt');
+    if (rp_installedAt === undefined) await chrome.storage.local.set({ rp_installedAt: Date.now() });
+  } catch { /* Optional local prompt bookkeeping must not affect installation. */ }
+});
 chrome.runtime.onStartup.addListener(() => syncPdfHandler().catch(console.error));
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area === 'sync' && changes.pdfMimeHandler) syncPdfHandler().catch(console.error);

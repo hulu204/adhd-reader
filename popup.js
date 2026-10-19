@@ -90,7 +90,7 @@ async function init() {
   if (tab?.url?.startsWith('https://docs.google.com/document/')) isDocs = true;
   const context = document.getElementById('context');
   context.hidden = !contextUrl && !isDocs;
-  context.textContent = isDocs ? 'Open Focus Reader' : 'Open in ADHD Reader';
+  context.textContent = isDocs ? 'Open Focus Reader' : 'Open in Gripread';
   context.onclick = async () => {
     try {
       const result = isDocs ? await chrome.tabs.sendMessage(tabId, { type: 'adhdr-docs-open' }) : await chrome.runtime.sendMessage({ type: 'adhdr-open-pdf', url: contextUrl });
@@ -101,4 +101,31 @@ async function init() {
   document.getElementById('hostname').textContent = hostname || 'This page has no supported site controls.';
   controls.site.disabled = !hostname; render(current);
 }
-init().catch(() => { document.getElementById('status').textContent = 'Settings could not be loaded. Reopen the popup to retry.'; });
+init().catch(() => { document.getElementById('status').textContent = 'Settings could not be loaded. Reopen the popup to retry.'; }).then(() => initRating());
+
+async function initRating() {
+  try {
+    const { rp_installedAt, rp_pages, rp_state } = await chrome.storage.local.get(['rp_installedAt', 'rp_pages', 'rp_state']);
+    if (!GripreadRating.shouldShow({ installedAt: rp_installedAt, pages: rp_pages, state: rp_state, now: Date.now() })) return;
+    const card = document.getElementById('rating');
+    // Persist before revealing so ignoring the card still counts as its single display.
+    await chrome.storage.local.set({ rp_state: 'shown' });
+    for (const [id, state, url] of [
+      ['rating-rate', 'rated', 'https://chromewebstore.google.com/detail/kcijmigamanbmbpnogjafedaicjfagob/reviews'],
+      ['rating-report', 'reported', 'https://github.com/hulu204/adhd-reader/issues'],
+      ['rating-dismiss', 'dismissed']
+    ]) {
+      document.getElementById(id).onclick = async () => {
+        try {
+          if (url) await chrome.tabs.create({ url });
+          await chrome.storage.local.set({ rp_state: state });
+        } catch { /* Optional actions must not interrupt popup controls. */ }
+        if (state === 'dismissed') {
+          card.classList.add('rating-leaving');
+          setTimeout(() => { card.hidden = true; }, 160);
+        } else card.hidden = true;
+      };
+    }
+    card.hidden = false;
+  } catch { /* Rating eligibility must never block popup initialization. */ }
+}

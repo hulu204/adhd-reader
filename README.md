@@ -1,16 +1,19 @@
-<h1 align="center"><img width="32" height="32" alt="ADHD Reader logo" src="assets/logo.png" /><br />ADHD Reader</h1>
+<h1 align="center"><img width="32" height="32" alt="Gripread logo" src="assets/logo.png" /><br />Gripread</h1>
+
+Gripread (formerly **ADHD Reader**)
+
 <h3 align="center">
   A Chrome extension for focused reading on any website.<br />It bolds the opening letters of every word, so your eyes have somewhere to land.
 </h3>
 
 <p align="center">
   <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/license-MIT-blue.svg"></a>
-  <a href="https://chromewebstore.google.com/detail/adhd-reader/kcijmigamanbmbpnogjafedaicjfagob"><img alt="Chrome Web Store" src="https://img.shields.io/badge/Chrome%20Web%20Store-v0.2.0-34A853.svg?logo=googlechrome&logoColor=white"></a>
+  <a href="https://chromewebstore.google.com/detail/adhd-reader/kcijmigamanbmbpnogjafedaicjfagob"><img alt="Chrome Web Store" src="https://img.shields.io/badge/Chrome%20Web%20Store-v0.3.0-34A853.svg?logo=googlechrome&logoColor=white"></a>
   <img alt="Manifest" src="https://img.shields.io/badge/manifest-V3-34A853.svg">
   <img alt="Dependencies" src="https://img.shields.io/badge/dependencies-0-8B5CF6.svg">
 </p>
 
-## Why ADHD Reader?
+## Why Gripread?
 
 - **Auto-on everywhere:** works on supported pages the moment you install it — no per-page clicks, no reader-mode shell.
 - **Native PDF text view:** Chrome 151+ MIME-handler integration, powered by a bundled pdf.js that never leaves your machine.
@@ -19,7 +22,7 @@
 
 ## How it works
 
-![ADHD Reader in action](assets/screenshot-main.png)
+![Gripread in action](assets/screenshot-main.png)
 
 Supported pages get emphasis automatically — no per-page clicks, no reader-mode shell. The original page layout, images, and code blocks are untouched; only word beginnings are bolded. Use the toolbar popup for Light / Balanced / Strong presets and fine-grained sliders, or press `Alt+Shift+R` to toggle the current site.
 
@@ -27,7 +30,7 @@ Supported pages get emphasis automatically — no per-page clicks, no reader-mod
 
 ### Chrome Web Store
 
-[![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-ADHD%20Reader-34A853.svg?logo=googlechrome&logoColor=white)](https://chromewebstore.google.com/detail/adhd-reader/kcijmigamanbmbpnogjafedaicjfagob)
+[![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-Gripread-34A853.svg?logo=googlechrome&logoColor=white)](https://chromewebstore.google.com/detail/adhd-reader/kcijmigamanbmbpnogjafedaicjfagob)
 
 ### From source
 
@@ -51,18 +54,16 @@ Supported pages get emphasis automatically — no per-page clicks, no reader-mod
 
 ## Comparison
 
-| | ADHD Reader | [Jiffy Reader](https://github.com/ansh/jiffyreader-public-archive) | [Hyper Bold](https://chromewebstore.google.com/detail/hyper-bold/bjicoipahmlimcmjoejgaoneibennoab) | [Bionic Reading®](https://bionic-reading.com/) |
-|---|:---:|:---:|:---:|:---:|
-| Free | ✅ | ✅ | ✅ | 💰 paid |
-| Open source | ✅ | ⚠️ archived 2025 | ❌ | ❌ |
-| Automatic on every page | ✅ | ✅ | ✅ | ❌ per-page clicks |
-| PDF text view | ✅ native MIME handler | ✅ | ❌ | ❌ |
-| Google Docs panel | ✅ | ❌ | ❌ | ❌ |
-| CJK scripts left unchanged | ✅ | ❌ | ❌ | ➖ |
-| Restores page on disable | ✅ | ⚠️ | ⚠️ | n/a (reader shell) |
-| Zero accounts / server / telemetry | ✅ | ✅ | ❓ closed | ❓ closed |
-
-*Bionic Reading® is a registered trademark of its respective owner; this project is independent and uses no trademarked terms in code or listings.*
+| | Gripread | [Jiffy Reader](https://github.com/ansh/jiffyreader-public-archive) | [Hyper Bold](https://chromewebstore.google.com/detail/hyper-bold/bjicoipahmlimcmjoejgaoneibennoab) |
+|---|:---:|:---:|:---:|
+| Free | ✅ | ✅ | ✅ |
+| Open source | ✅ | ⚠️ archived 2025 | ❌ |
+| Automatic on every page | ✅ | ✅ | ✅ |
+| PDF text view | ✅ native MIME handler | ✅ | ❌ |
+| Google Docs panel | ✅ | ❌ | ❌ |
+| CJK scripts left unchanged | ✅ | ❌ | ❌ |
+| Restores page on disable | ✅ | ⚠️ | ⚠️ |
+| Zero accounts / server / telemetry | ✅ | ✅ | ❓ closed |
 
 ## Settings
 
@@ -81,7 +82,7 @@ Sliders preview on the active page while dragging and save on release. Preferenc
 
 ## PDF reading view
 
-Chrome's built-in PDF viewer cannot be restyled by extensions, so ADHD Reader ships its own local text view powered by pdf.js 5.4.149 (bundled under `vendor/pdfjs/`, Apache-2.0). On Chrome 151+ the `application/pdf` MIME handler keeps the original URL in the address bar and supports embedded PDFs; a viewer button hands the stream back to Chrome's native viewer. The popup also offers **Open in ADHD Reader** for PDF URLs and local files (the local file picker needs no file-access switch). This is a text view: layout and images may differ, and scanned PDFs without a text layer cannot be emphasized.
+Chrome's built-in PDF viewer cannot be restyled by extensions, so Gripread ships its own local text view powered by pdf.js 5.4.149 (bundled under `vendor/pdfjs/`, Apache-2.0). On Chrome 151+ the `application/pdf` MIME handler keeps the original URL in the address bar and supports embedded PDFs; a viewer button hands the stream back to Chrome's native viewer. The popup also offers **Open in Gripread** for PDF URLs and local files (the local file picker needs no file-access switch). This is a text view: layout and images may differ, and scanned PDFs without a text layer cannot be emphasized.
 
 ## Google Docs
 
@@ -100,7 +101,7 @@ No accounts, no server, no analytics, no remote code. Page text is processed loc
 
 ## Development
 
-No build dependencies. Regenerate icons with `node scripts/make-icons.js`, syntax-check with `node --check`, run behavioral checks with `node scripts/check.js` (Node 20+), and package with `bash scripts/build.sh` → `dist/adhd-reader.zip`.
+No build dependencies. Regenerate icons with `node scripts/make-icons.js`, syntax-check with `node --check`, run behavioral checks with `node scripts/check.js` (Node 20+), and package with `bash scripts/build.sh` → `dist/gripread-v0.3.0.zip`.
 
 To refresh the bundled pdf.js: `npm pack pdfjs-dist@5.4.149`, then copy `build/pdf.min.mjs`, `build/pdf.worker.min.mjs`, and `LICENSE` into `vendor/pdfjs/`. Keep library and worker versions identical.
 
@@ -108,11 +109,10 @@ To refresh the bundled pdf.js: `npm pack pdfjs-dist@5.4.149`, then copy `build/p
 
 This space has several options worth knowing:
 
-- [Jiffy Reader](https://github.com/ansh/jiffyreader-public-archive) — pioneered free bionic-style reading; the original repository was archived in 2025.
+- [Jiffy Reader](https://github.com/ansh/jiffyreader-public-archive) — pioneered free fixation-style reading; the original repository was archived in 2025.
 - [Hyper Bold](https://chromewebstore.google.com/detail/hyper-bold/bjicoipahmlimcmjoejgaoneibennoab) — a lightweight closed-source alternative.
-- [Bionic Reading®](https://bionic-reading.com/) — the trademarked original; paid.
 
-If ADHD Reader isn't for you, one of these might be.
+If Gripread isn't for you, one of these might be.
 
 ## License
 

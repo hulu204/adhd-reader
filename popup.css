@@ -44,3 +44,12 @@ input[type=range]:active::-webkit-slider-thumb { transform: scale(1.18); }
   body, header, .card { animation: none; }
   button:active { transform: none; }
 }
+
+main .card:nth-child(4) { animation-delay: .2s; }
+.rating-actions { display: grid; gap: 8px; }
+.rating-actions .subtle { background: transparent; border-color: transparent; color: var(--muted); }
+@keyframes adhdr-fade { to { opacity: 0; } }
+.card.rating-leaving { animation: adhdr-fade .15s ease forwards; }
+@media (prefers-reduced-motion: reduce) {
+  .card.rating-leaving { animation: none; }
+}
